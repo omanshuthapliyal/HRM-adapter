@@ -1,0 +1,44 @@
+# AdaLoRA on Mistral-7B-v0.1 -- cluster track
+# Tier-2 iso-parameter budget: ~8.39M total (matching LoRA r=16 / HRM d=32)
+# target_r=16 with init_r=24 -- SVD pruning converges to budget within tinit..tfinal steps
+
+model:
+  name: "mistralai/Mistral-7B-v0.1"
+  torch_dtype: "float16"
+
+adapter:
+  type: "adalora"
+  target_r: 16
+  init_r: 24
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+  tinit: 50                    # ~5% of qmsum total steps (~785 steps)
+  tfinal: 600                  # ~76% of qmsum, ~36% of quality -- safe for both tasks
+  deltaT: 10
+  beta1: 0.85
+  beta2: 0.85
+  orth_reg_weight: 0.5
+
+task:
+  max_input_length: 2048
+  max_new_tokens: 128
+
+training:
+  epochs: 5
+  batch_size: 1
+  grad_accum: 8
+  lr: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  grad_clip: 1.0
+  fp16: true
+  bf16: false
+  gradient_checkpointing: true
+
+output:
+  save_dir: "experiments/cluster/checkpoints"
+  log_dir: "experiments/cluster/logs"
+  log_every_n_steps: 20

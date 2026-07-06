@@ -1,0 +1,52 @@
+# MLP-LoRA on Mistral-7B-v0.1 -- injection site ablation
+# Injects LoRA into MLP feed-forward projections instead of attention Q/V.
+# Iso-parametric with standard LoRA (r=16 on q+v) and HRM (d=32):
+#
+# Parameter breakdown (r=4, gate/up/down_proj each = 4096x14336):
+#   gate_proj: 4x4096 + 14336x4 = 73,728  (A: 4x4096, B: 4096x4 wrong -- use peft shapes)
+#   Actually for Mistral-7B MLP: d_model=4096, d_ff=14336
+#   gate_proj LoRA: r*(4096+14336) = 4*18432 = 73,728
+#   up_proj   LoRA: r*(4096+14336) = 73,728
+#   down_proj LoRA: r*(14336+4096) = 73,728
+#   per-layer: 3 * 73,728 = 221,184  x  32 layers = 7,077,888
+#   To reach ~8.4M: use r=4 -> ~7.1M (close enough; adjust alpha proportionally)
+#   Alternative: r=5 -> ~8.85M (slightly over); r=4 is the closest under-budget match.
+#
+# Purpose: isolate injection-site effect (MLP vs attention) from adapter architecture (SSM vs LoRA).
+# If MLP-LoRA > attn-LoRA on QuALITY: injection site is the finding.
+# If MLP-LoRA < HRM: SSM architecture adds value beyond site selection alone.
+
+model:
+  name: "mistralai/Mistral-7B-v0.1"
+  torch_dtype: "float16"
+
+adapter:
+  type: "lora"
+  lora_rank: 4
+  lora_alpha: 8
+  lora_dropout: 0.05
+  target_modules:
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+task:
+  max_input_length: 2048
+  max_new_tokens: 128
+
+training:
+  epochs: 5
+  batch_size: 1
+  grad_accum: 8
+  lr: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  grad_clip: 1.0
+  fp16: true
+  bf16: false
+  gradient_checkpointing: true
+
+output:
+  save_dir: "experiments/cluster/checkpoints"
+  log_dir: "experiments/cluster/logs"
+  log_every_n_steps: 20

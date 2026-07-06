@@ -1,0 +1,19 @@
+# Phase 2: Fine-tune with Hankel-reduced SSM adapter (post-BT)
+
+training:
+  epochs: 10
+  batch_size: 64
+  lr: 1.0e-4                    # lower LR -- adapter is already warm-started
+  weight_decay: 0.0
+  grad_clip: 1.0
+  optimizer: adamw
+  lr_scheduler: cosine
+  warmup_steps: 50
+
+  checkpoint:
+    save_dir: checkpoints/phase2
+    save_every: 5
+    save_best: true
+    metric: val_accuracy
+
+  load_from: checkpoints/phase1/best.pt   # starting point for phase 2

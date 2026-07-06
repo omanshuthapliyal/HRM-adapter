@@ -1,0 +1,20 @@
+# Phase 1: Train with full-rank SSM adapter (pre-reduction)
+
+training:
+  epochs: 20
+  batch_size: 64
+  lr: 3.0e-4
+  weight_decay: 0.0
+  grad_clip: 1.0
+  optimizer: adamw
+  lr_scheduler: cosine
+  warmup_steps: 100
+
+  checkpoint:
+    save_dir: checkpoints/phase1
+    save_every: 5               # epochs
+    save_best: true
+    metric: val_accuracy
+
+  collect_states: true          # enable hooks to snapshot SSM hidden states
+  calib_epoch: 15               # epoch at which to run Grammian collection

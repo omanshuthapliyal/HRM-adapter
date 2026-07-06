@@ -1,0 +1,43 @@
+# QLoRA on Mistral-7B-v0.1 -- cluster track
+# 4-bit NF4 quantized base + LoRA r=16 adapters
+# NOTE: QLoRA comparison is accuracy-parity only -- quantization reduces VRAM
+# (4-bit model ~= 3.5GB vs 14GB float16) but does NOT improve accuracy over LoRA.
+# Table footnote must state: "QLoRA uses 4-bit NF4 base; adapter params identical to LoRA."
+
+model:
+  name: "mistralai/Mistral-7B-v0.1"
+  torch_dtype: "float16"       # compute dtype for LoRA adapters (base is loaded in 4-bit)
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_compute_dtype: "float16"
+  bnb_4bit_use_double_quant: true
+
+adapter:
+  type: "qlora"
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+
+task:
+  max_input_length: 2048
+  max_new_tokens: 128
+
+training:
+  epochs: 5
+  batch_size: 2                # QLoRA uses less VRAM -> can double batch
+  grad_accum: 4                # effective batch = 8 (same as others)
+  lr: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  grad_clip: 1.0
+  fp16: false
+  bf16: false                  # bitsandbytes handles its own dtype internally
+  gradient_checkpointing: true
+
+output:
+  save_dir: "experiments/cluster/checkpoints"
+  log_dir: "experiments/cluster/logs"
+  log_every_n_steps: 20

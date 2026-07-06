@@ -1,0 +1,19 @@
+# HRM-Adapter configuration
+# SSM inserted as residual adapter in parallel to MLP layers
+
+hrm:
+  state_dim: 32                  # d -- full SSM state dim before reduction
+  input_dim: 128                 # must match d_model
+  output_dim: 128                # must match d_model
+  discretization: zoh            # Zero-Order Hold (do not change for baseline)
+  dt_init: 0.01                  # initial step size Delta
+  dt_min: 1.0e-4
+  dt_max: 0.1
+  diagonal_a: true               # parameterize A as diagonal (stable by construction)
+
+  reduction:
+    enabled: false               # set true for phase 2 (post-BT)
+    target_dim: null             # d_hat -- set by reduce_adapter.py from HSV decay
+    hsv_threshold: 0.01          # keep modes where sigma_i / sigma_1 >= threshold
+    calib_samples: 500
+    calib_seq_len: 64

@@ -1,0 +1,40 @@
+# LoRA on Mistral-7B-v0.1 -- cluster track
+# Tier-2 iso-parameter: r=16 on q+v projections  (~8.39M trainable params)
+#
+# Parameter breakdown (r=16, d_model=4096, n_layers=32):
+#   q_proj: 16x4096 + 4096x16 = 131,072  |  v_proj: same
+#   per-layer: 262,144  x  32 = 8,388,608 params
+
+model:
+  name: "mistralai/Mistral-7B-v0.1"
+  torch_dtype: "float16"
+
+adapter:
+  type: "lora"
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+
+task:
+  max_input_length: 2048
+  max_new_tokens: 128
+
+training:
+  epochs: 5
+  batch_size: 1
+  grad_accum: 8
+  lr: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  grad_clip: 1.0
+  fp16: true
+  bf16: false
+  gradient_checkpointing: true
+
+output:
+  save_dir: "experiments/cluster/checkpoints"
+  log_dir: "experiments/cluster/logs"
+  log_every_n_steps: 20

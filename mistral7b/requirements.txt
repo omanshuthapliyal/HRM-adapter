@@ -1,0 +1,25 @@
+# HRM-Adapters cluster requirements — LongBench PEFT comparison
+# Pin minor versions for reproducibility; patch versions left open.
+# Base image: pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime (PyTorch 2.1.2 pre-installed)
+
+# HuggingFace stack
+transformers==4.40.*
+datasets==2.19.*
+tokenizers==0.19.*
+accelerate==0.29.*
+peft==0.10.*                   # AdaLoRA, DoRA (use_dora=True), LoRA
+bitsandbytes==0.43.*           # QLoRA 4-bit quantization
+
+# Evaluation
+rouge-score==0.1.*
+nltk==3.8.*
+
+# Data / utilities
+numpy==1.26.*
+scipy==1.13.*
+tqdm==4.66.*
+pyyaml==6.0.*
+pandas==2.2.*
+
+# For LongBench dataset access
+huggingface_hub==0.22.*

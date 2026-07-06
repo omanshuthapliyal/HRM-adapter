@@ -1,0 +1,39 @@
+# HRM adapter on Mistral-7B-v0.1 -- cluster track
+# Tier-2 iso-parameter: d=32 ~= LoRA r=16  (~8.39M trainable params)
+#
+# Parameter breakdown (d=32, d_model=4096, n_layers=32):
+#   B: 32x4096 = 131,072  |  C: 4096x32 = 131,072  |  log_A+log_dt: 64  |  gate: 1
+#   per-layer: 262,209  x  32 layers = 8,390,688 params
+
+model:
+  name: "mistralai/Mistral-7B-v0.1"
+  torch_dtype: "float16"       # 7B x 2B = 14GB -- fits on 2x4090 in float16
+
+adapter:
+  type: "hrm"
+  state_dim: 32                # Tier-2 iso-param
+  gate_init: 0.0               # zero-residual: base model unaffected at init
+  dt_init: 0.01
+  dt_min: 1.0e-4
+  dt_max: 0.1
+
+task:
+  max_input_length: 2048       # keep under Mistral 8K window; leaves room for output
+  max_new_tokens: 128
+
+training:
+  epochs: 5
+  batch_size: 1
+  grad_accum: 8                # effective batch = 8
+  lr: 5.0e-4               # higher than LoRA: zero-gate delays SSM grad signal
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  grad_clip: 1.0
+  fp16: true
+  bf16: false
+  gradient_checkpointing: true
+
+output:
+  save_dir: "experiments/cluster/checkpoints"
+  log_dir: "experiments/cluster/logs"
+  log_every_n_steps: 20

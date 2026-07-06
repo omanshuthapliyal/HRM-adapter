@@ -1,0 +1,34 @@
+# Conda environment for local Mac (Apple Silicon) prototyping
+# PyTorch uses MPS backend -- no CUDA required
+#
+# Create:  conda env create -f environment_mac.yaml
+# Activate: conda activate hrm-mac
+# Update:  conda env update -f environment_mac.yaml --prune
+
+name: hrm-mac
+
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - pip
+
+  # PyTorch -- Apple Silicon MPS build (no CUDA suffix)
+  - pytorch::pytorch>=2.2.0
+  - pytorch::torchvision
+
+  - pip:
+    - einops>=0.7.0
+    - scipy>=1.12.0
+    - numpy>=1.26.0
+    - matplotlib>=3.8.0
+    - tqdm>=4.66.0
+    - pyyaml>=6.0.1
+    # MIDI tokenization (for MAESTRO task)
+    - miditok>=3.0.4
+    # development extras
+    - ipykernel
+    - jupyter

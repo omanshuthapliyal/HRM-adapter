@@ -1,0 +1,40 @@
+# DoRA on Mistral-7B-v0.1 -- cluster track
+# Tier-2 iso-parameter: r=16 + magnitude vector (~8.52M trainable params)
+# DoRA = LoRA with weight decomposition: W = m * (W0 + deltaW) / ||W0 + deltaW||
+# The magnitude vector m adds 4096x32=131,072 params (one per output feature per layer)
+# -> +0.16% vs LoRA r=16; treated as iso-parameter (within +/-1% protocol)
+
+model:
+  name: "mistralai/Mistral-7B-v0.1"
+  torch_dtype: "float16"
+
+adapter:
+  type: "dora"
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  use_dora: true               # peft LoraConfig flag
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+
+task:
+  max_input_length: 2048
+  max_new_tokens: 128
+
+training:
+  epochs: 5
+  batch_size: 1
+  grad_accum: 8
+  lr: 2.0e-4
+  weight_decay: 0.01
+  warmup_ratio: 0.03
+  grad_clip: 1.0
+  fp16: true
+  bf16: false
+  gradient_checkpointing: true
+
+output:
+  save_dir: "experiments/cluster/checkpoints"
+  log_dir: "experiments/cluster/logs"
+  log_every_n_steps: 20

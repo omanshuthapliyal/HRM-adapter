@@ -1,0 +1,12 @@
+# Small Transformer backbone for POC experiments
+# ~2M parameters -- Mac-prototypable, single-GPU trainable
+
+model:
+  d_model: 128
+  n_heads: 4
+  n_layers: 2
+  d_ff: 512          # feedforward hidden dim (4 * d_model)
+  seq_len: 64
+  vocab_size: 16     # synthetic task vocabulary
+  dropout: 0.0
+  tie_embeddings: true

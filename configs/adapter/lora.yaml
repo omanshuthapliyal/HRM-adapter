@@ -1,0 +1,11 @@
+# LoRA adapter configuration
+# Applied to Q, V projections in each attention layer
+
+lora:
+  rank: 8                        # r -- low-rank bottleneck dimension
+  alpha: 16                      # scaling factor (effective scale = alpha / rank)
+  target_modules:                # which Linear layers to wrap
+    - attn.q_proj
+    - attn.v_proj
+  dropout: 0.0
+  init_weights: true             # A ~ N(0,1), B = 0 (standard LoRA init)

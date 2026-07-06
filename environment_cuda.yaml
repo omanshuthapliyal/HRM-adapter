@@ -1,0 +1,34 @@
+# Conda environment for GPU server (2x RTX 4090, CUDA 12.1)
+#
+# Create:  conda env create -f environment_cuda.yaml
+# Activate: conda activate hrm-gpu
+# Update:  conda env update -f environment_cuda.yaml --prune
+
+name: hrm-gpu
+
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - pip
+  - nvidia::cuda-toolkit=12.1
+
+  # PyTorch CUDA 12.1 build
+  - pytorch::pytorch>=2.2.0
+  - pytorch::torchvision
+  - pytorch::pytorch-cuda=12.1
+
+  - pip:
+    - einops>=0.7.0
+    - scipy>=1.12.0
+    - numpy>=1.26.0
+    - matplotlib>=3.8.0
+    - tqdm>=4.66.0
+    - pyyaml>=6.0.1
+    - ipykernel
+    - jupyter
+    - miditok>=3.0.4
